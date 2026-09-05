@@ -49,3 +49,4 @@ int pa2m_mostrar_reporte()
 	       __pa2m_cantidad_de_pruebas_fallidas,
 	       __pa2m_cantidad_de_pruebas_fallidas == 0 ? "OK" : "D:");
 	return __pa2m_cantidad_de_pruebas_fallidas;
+}
