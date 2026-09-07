@@ -201,7 +201,7 @@ size_t tp1_cantidad(tp1_t *tp1)
  */
 tp1_t *tp1_combinar(tp1_t *tp1_a, tp1_t *tp1_b)
 {
-	if (tp1_a == NULL && tp1_b == NULL) {
+	if (tp1_a == NULL || tp1_b == NULL) {
 		return NULL;
 	}
 
@@ -238,7 +238,7 @@ tp1_t *tp1_combinar(tp1_t *tp1_a, tp1_t *tp1_b)
 		tp1_r->cantidad++;
 
 		//Caso: Primer string mayor (o sea tp1_a)
-		if (comp < 0) {
+		if (comp > 0) {
 			data = cargar_tp1(tp1_r,
 					  tp1_b->pokemones[i_b].velocidad,
 					  tp1_b->pokemones[i_b].peso,
@@ -251,7 +251,7 @@ tp1_t *tp1_combinar(tp1_t *tp1_a, tp1_t *tp1_b)
 					&tp1_r->pokemones,
 					tp1_r->cantidad);
 			}
-		} else if (comp > 0) { //Caso: Primer string menor
+		} else if (comp < 0) { //Caso: Primer string menor
 			data = cargar_tp1(tp1_r,
 					  tp1_a->pokemones[i_a].velocidad,
 					  tp1_a->pokemones[i_a].peso,
