@@ -6,10 +6,11 @@
 #include "tp1.h"
 #include "leer_linea.h"
 
+#define PRESICION 0.000001
 #define ERR 0
 
 const char *FOMRATO_LECTURA = "%m[^,],%d,%f,%c";
-const char *FORMATO_ESCRITURA = "%s,%d,%f,%c\n";
+const char *FORMATO_ESCRITURA = "%s,%d,%.1f,%c\n";
 
 const char *MODO_LECTURA = "r";
 const char *MODO_ESCRITURA = "w";
@@ -20,6 +21,8 @@ const int MIN_VELOCIDAD = 1;
 const char RAREZA_COMUN_C = 'C';
 const char RAREZA_RARO_C = 'R';
 const char RAREZA_LEGENDARIO_C = 'L';
+
+
 
 struct tp1 {
 	struct pokemon *pokemones;
@@ -34,9 +37,8 @@ void ordenar_pokemones(struct pokemon *pokemones, size_t tope)
 		j = i;
 		aux = pokemones[i];
 
-		//Indico si el primer string es menor que el otro
 		while ((j > 0) &&
-		       strcasecmp(pokemones[j - 1].nombre, aux.nombre) < 0) {
+		       strcasecmp(pokemones[j - 1].nombre, aux.nombre) > 0) {
 			pokemones[j] = pokemones[j - 1];
 			j--;
 		}
@@ -84,7 +86,7 @@ bool reservar_memoria(struct pokemon **a_reservar, size_t tamanio)
 	struct pokemon *aux = realloc(*a_reservar, sizeof(struct pokemon) * (tamanio + 1));
 
 	if (aux == NULL) {
-		err = false;
+		err = true;
 	} else {
 		*a_reservar = aux;
 	}
@@ -153,6 +155,8 @@ tp1_t *tp1_leer_archivo(const char *nombre)
 					err = reservar_memoria(
 						&file->pokemones,
 						file->cantidad);
+				} else {
+					free(name);
 				}
 			} else {
 				free(name);
@@ -230,8 +234,11 @@ tp1_t *tp1_combinar(tp1_t *tp1_a, tp1_t *tp1_b)
 				      tp1_b->pokemones[i_b].nombre);
 
 		bool data;
+
+		tp1_r->cantidad++;
+
 		//Caso: Primer string mayor (o sea tp1_a)
-		if (comp > 0) {
+		if (comp < 0) {
 			data = cargar_tp1(tp1_r,
 					  tp1_b->pokemones[i_b].velocidad,
 					  tp1_b->pokemones[i_b].peso,
@@ -244,7 +251,7 @@ tp1_t *tp1_combinar(tp1_t *tp1_a, tp1_t *tp1_b)
 					&tp1_r->pokemones,
 					tp1_r->cantidad);
 			}
-		} else if (comp < 0) { //Caso: Primer string menor
+		} else if (comp > 0) { //Caso: Primer string menor
 			data = cargar_tp1(tp1_r,
 					  tp1_a->pokemones[i_a].velocidad,
 					  tp1_a->pokemones[i_a].peso,
@@ -274,7 +281,6 @@ tp1_t *tp1_combinar(tp1_t *tp1_a, tp1_t *tp1_b)
 					tp1_r->cantidad);
 			}
 		}
-		tp1_r->cantidad++;
 	}
 
 	if (err) {
@@ -334,9 +340,22 @@ tp1_t *tp1_escribir_archivo(tp1_t *tp1, const char *nombre)
 	}
 
 	for (int i = 0; i < tp1->cantidad; i++) {
+
+		char rareza_c = RAREZA_COMUN_C;
+
+		int rareza_e = tp1->pokemones[i].rareza;
+
+		if (rareza_e == RAREZA_COMUN) {
+			rareza_c = RAREZA_COMUN_C;
+		} else if (rareza_e == RAREZA_RARO) {
+			rareza_c = RAREZA_RARO_C;
+		} else if (rareza_e == RAREZA_LEGENDARIO) {
+			rareza_c = RAREZA_LEGENDARIO_C;
+		}
+
 		fprintf(archivo, FORMATO_ESCRITURA, tp1->pokemones[i].nombre,
-			tp1->pokemones[i].velocidad, tp1->pokemones[i].peso,
-			tp1->pokemones[i].rareza);
+			tp1->pokemones[i].velocidad, tp1->pokemones[i].peso + PRESICION,
+			rareza_c);
 	}
 
 	fclose(archivo);
