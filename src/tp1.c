@@ -1,7 +1,7 @@
 #include <stdbool.h>
 #include <stdio.h>
-#include <string.h>
 #include <strings.h>
+#include <string.h>
 #include <ctype.h>
 #include "tp1.h"
 #include "leer_linea.h"
@@ -23,8 +23,6 @@ const char RAREZA_COMUN_C = 'C';
 const char RAREZA_RARO_C = 'R';
 const char RAREZA_LEGENDARIO_C = 'L';
 
-
-
 struct tp1 {
 	struct pokemon *pokemones;
 	size_t cantidad;
@@ -37,7 +35,6 @@ void ordenar_pokemones(struct pokemon *pokemones, size_t tope)
 	for (size_t i = 1; i < tope; i++) {
 		j = i;
 		aux = pokemones[i];
-		printf("He entrado al for\n");
 		while ((j > 0) &&
 		       strcasecmp(pokemones[j - 1].nombre, aux.nombre) > 0) {
 			pokemones[j] = pokemones[j - 1];
@@ -50,7 +47,6 @@ void ordenar_pokemones(struct pokemon *pokemones, size_t tope)
 bool cargar_tp1(tp1_t *tp1, int velocidad, float peso, char *nombre,
 		char rareza)
 {
-
 	if (velocidad >= MIN_VELOCIDAD && velocidad <= MAX_VELOCIDAD) {
 		tp1->pokemones[tp1->cantidad].velocidad = velocidad;
 	} else {
@@ -73,7 +69,11 @@ bool cargar_tp1(tp1_t *tp1, int velocidad, float peso, char *nombre,
 		return false;
 	}
 
-	tp1->pokemones[tp1->cantidad].nombre = nombre;
+	tp1->pokemones[tp1->cantidad].nombre = strdup(nombre);
+
+	if (tp1->pokemones[tp1->cantidad].nombre == NULL) {
+		return false;
+	}
 
 	return true;
 }
@@ -82,7 +82,8 @@ bool reservar_memoria(struct pokemon **a_reservar, size_t tamanio)
 {
 	bool err = false;
 
-	struct pokemon *aux = realloc(*a_reservar, sizeof(struct pokemon) * (tamanio + 1));
+	struct pokemon *aux =
+		realloc(*a_reservar, sizeof(struct pokemon) * (tamanio + 1));
 
 	if (aux == NULL) {
 		err = true;
@@ -134,26 +135,23 @@ tp1_t *tp1_leer_archivo(const char *nombre)
 				   &peso, &rareza);
 		//Confirmo que sean 4 columnas
 		if (leido == 4) {
-            
-            bool repetido = false;
-            
-			for (int i = 0; i < file->cantidad; i++) {
-                if (strcasecmp(file->pokemones[i].nombre,
-                    name) == 0) {
-                    repetido = true;
-                }
-            }
+			bool repetido = false;
 
-            if (!repetido) {
-                bool data = cargar_tp1(file, velocidad, peso,
+			for (int i = 0; i < file->cantidad; i++) {
+				if (strcasecmp(file->pokemones[i].nombre,
+					       name) == 0) {
+					repetido = true;
+				}
+			}
+
+			if (!repetido) {
+				bool data = cargar_tp1(file, velocidad, peso,
 						       name, rareza);
 
-							   
 				if (data) {
 					file->cantidad++;
-					err = reservar_memoria(
-						&file->pokemones,
-						file->cantidad);
+					err = reservar_memoria(&file->pokemones,
+							       file->cantidad);
 				} else {
 					free(name);
 				}
@@ -206,21 +204,16 @@ tp1_t *tp1_combinar(tp1_t *tp1_a, tp1_t *tp1_b)
 
 	//Reservo un tp1
 	tp1_t *tp1_r = malloc(sizeof(tp1_t));
-	
 
 	if (tp1_r == NULL) {
 		return NULL;
 	}
-
-	printf("Reservo memoria para tp1\n");
 
 	tp1_r->pokemones = malloc(sizeof(struct pokemon));
 
 	if (tp1_r->pokemones == NULL) {
 		return NULL;
 	}
-
-	printf("Reservo memoria para pokemon\n");
 
 	tp1_r->cantidad = 0;
 
@@ -229,22 +222,15 @@ tp1_t *tp1_combinar(tp1_t *tp1_a, tp1_t *tp1_b)
 
 	bool err = false;
 
-	printf("Previo a ordenar\n");
-
 	ordenar_pokemones(tp1_b->pokemones, tp1_b->cantidad);
 
-	printf("tp1_b Ordenado\nYendo a ordenar el tp1_a\n");
-
 	ordenar_pokemones(tp1_a->pokemones, tp1_a->cantidad);
-
-	printf("Ordenado correctamente");
 
 	while (i_a < tp1_a->cantidad && i_b < tp1_b->cantidad && !err) {
 		int comp = strcasecmp(tp1_a->pokemones[i_a].nombre,
 				      tp1_b->pokemones[i_b].nombre);
 
 		bool data;
-
 		//Caso: Primer string mayor (o sea tp1_a)
 		if (comp > 0) {
 			data = cargar_tp1(tp1_r,
@@ -272,15 +258,15 @@ tp1_t *tp1_combinar(tp1_t *tp1_a, tp1_t *tp1_b)
 			i_b++;
 		}
 
-		if (!data) {
+		if (data) {
 			tp1_r->cantidad++;
-			err = reservar_memoria(
-				&tp1_r->pokemones,
-				tp1_r->cantidad);
-			}
+			err = reservar_memoria(&tp1_r->pokemones,
+					       tp1_r->cantidad);
+		}
 	}
 
 	if (err) {
+		tp1_destruir(tp1_r);
 		return NULL;
 	}
 
@@ -291,9 +277,10 @@ tp1_t *tp1_combinar(tp1_t *tp1_a, tp1_t *tp1_b)
 				       tp1_a->pokemones[i_a].rareza);
 		i_a++;
 
-		if (!data) {
+		if (data) {
+			tp1_r->cantidad++;
 			err = reservar_memoria(&tp1_r->pokemones,
-					 tp1_r->cantidad);
+					       tp1_r->cantidad);
 		}
 	}
 
@@ -304,13 +291,15 @@ tp1_t *tp1_combinar(tp1_t *tp1_a, tp1_t *tp1_b)
 				       tp1_b->pokemones[i_b].rareza);
 		i_b++;
 
-		if (!data) {
+		if (data) {
+			tp1_r->cantidad++;
 			err = reservar_memoria(&tp1_r->pokemones,
-					 tp1_r->cantidad);
+					       tp1_r->cantidad);
 		}
 	}
 
 	if (err) {
+		tp1_destruir(tp1_r);
 		return NULL;
 	}
 
@@ -337,7 +326,6 @@ tp1_t *tp1_escribir_archivo(tp1_t *tp1, const char *nombre)
 	}
 
 	for (int i = 0; i < tp1->cantidad; i++) {
-
 		char rareza_c = RAREZA_COMUN_C;
 
 		int rareza_e = tp1->pokemones[i].rareza;
@@ -351,8 +339,8 @@ tp1_t *tp1_escribir_archivo(tp1_t *tp1, const char *nombre)
 		}
 
 		fprintf(archivo, FORMATO_ESCRITURA, tp1->pokemones[i].nombre,
-			tp1->pokemones[i].velocidad, tp1->pokemones[i].peso + PRESICION,
-			rareza_c);
+			tp1->pokemones[i].velocidad,
+			tp1->pokemones[i].peso + PRESICION, rareza_c);
 	}
 
 	fclose(archivo);
@@ -444,5 +432,5 @@ void *tp1_destruir(tp1_t *tp1)
 	free(tp1->pokemones);
 	free(tp1);
 
-    return NULL;
+	return NULL;
 }
