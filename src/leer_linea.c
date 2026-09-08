@@ -5,15 +5,13 @@
 
 #define ERROR -1
 
-
-char *leer_linea(FILE* archivo)
+char *leer_linea(FILE *archivo)
 {
-    
-    if (archivo == NULL) {
-        return NULL;
-    }
-    
-    int size = 1;
+	if (archivo == NULL) {
+		return NULL;
+	}
+
+	int size = 1;
 
 	char *linea = NULL;
 	linea = malloc((size_t)size * sizeof(char));
@@ -61,9 +59,9 @@ char *leer_linea(FILE* archivo)
 	return linea;
 }
 
-int leer_linea_ptr(char **ptr, size_t *tamaño, FILE* archivo)
+int leer_linea_ptr(char **ptr, size_t *tamaño, FILE *archivo)
 {
-    //Verifico el puntero
+	//Verifico el puntero
 	if (ptr == NULL || *ptr == NULL || archivo == NULL) {
 		return ERROR;
 	}
@@ -92,11 +90,10 @@ int leer_linea_ptr(char **ptr, size_t *tamaño, FILE* archivo)
 				*ptr = aux;
 			}
 		}
-		if (!mal_reservado) {	
+		if (!mal_reservado) {
 			(*ptr)[total_leidos - 1] = (char)c;
 			c = fgetc(archivo);
 			total_leidos++;
-		
 		}
 	}
 
@@ -107,7 +104,6 @@ int leer_linea_ptr(char **ptr, size_t *tamaño, FILE* archivo)
 	//Cierro el string
 	(*ptr)[total_leidos - 1] = '\0';
 	(*tamaño)++;
-
 
 	//Corrijo el total con un -1
 	return (int)total_leidos - 1;
