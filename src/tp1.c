@@ -9,7 +9,7 @@
 #define PRESICION 0.000001
 #define ERR 0
 
-const char *FOMRATO_LECTURA = "%m[^,],%d,%f,%c";
+const char *FOMRATO_LECTURA = "%m[^,],%d,%f,%c %c";
 const char *FORMATO_ESCRITURA = "%s,%d,%.1f,%c\n";
 
 const char *MODO_LECTURA = "r";
@@ -125,6 +125,7 @@ tp1_t *tp1_leer_archivo(const char *nombre)
 	int velocidad;
 	float peso;
 	char rareza;
+	char otro;
 
 	bool err = false;
 
@@ -132,7 +133,7 @@ tp1_t *tp1_leer_archivo(const char *nombre)
 
 	while (linea != NULL && !err) {
 		int leido = sscanf(linea, FOMRATO_LECTURA, &name, &velocidad,
-				   &peso, &rareza);
+				   &peso, &rareza, &otro);
 		//Confirmo que sean 4 columnas
 		if (leido == 4) {
 			bool repetido = false;
@@ -156,6 +157,10 @@ tp1_t *tp1_leer_archivo(const char *nombre)
 					free(name);
 				}
 			} else {
+				free(name);
+			}
+		} else {
+			if (leido > 0) {
 				free(name);
 			}
 		}
