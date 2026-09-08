@@ -17,6 +17,7 @@ const char *MODO_ESCRITURA = "w";
 
 const int MAX_VELOCIDAD = 99;
 const int MIN_VELOCIDAD = 1;
+const int PESO_MIN = 0;
 
 const char RAREZA_COMUN_C = 'C';
 const char RAREZA_RARO_C = 'R';
@@ -57,7 +58,7 @@ bool cargar_tp1(tp1_t *tp1, int velocidad, float peso, char *nombre,
 		invalid_data = true;
 	}
 
-	if (peso > 0) {
+	if (peso > PESO_MIN) {
 		tp1->pokemones[tp1->cantidad].peso = peso;
 	} else {
 		invalid_data = true;
@@ -207,16 +208,21 @@ tp1_t *tp1_combinar(tp1_t *tp1_a, tp1_t *tp1_b)
 
 	//Reservo un tp1
 	tp1_t *tp1_r = malloc(sizeof(tp1_t));
+	
 
 	if (tp1_r == NULL) {
 		return NULL;
 	}
+
+	printf("Reservo memoria para tp1\n");
 
 	tp1_r->pokemones = malloc(sizeof(struct pokemon));
 
 	if (tp1_r->pokemones == NULL) {
 		return NULL;
 	}
+
+	printf("Reservo memoria para pokemon\n");
 
 	tp1_r->cantidad = 0;
 
@@ -225,9 +231,13 @@ tp1_t *tp1_combinar(tp1_t *tp1_a, tp1_t *tp1_b)
 
 	bool err = false;
 
+	printf("Previo a ordenar\n");
+
 	ordenar_pokemones(tp1_a->pokemones, tp1_a->cantidad);
 
 	ordenar_pokemones(tp1_b->pokemones, tp1_b->cantidad);
+
+	printf("Ordenado correctamente");
 
 	while (i_a < tp1_a->cantidad && i_b < tp1_b->cantidad && !err) {
 		int comp = strcasecmp(tp1_a->pokemones[i_a].nombre,
@@ -404,6 +414,8 @@ struct pokemon *tp1_buscar_orden(tp1_t *tp1, size_t n)
 	}
 
 	ordenar_pokemones(tp1->pokemones, tp1->cantidad);
+
+	printf("file ordenado correctamente\n");
 
 	return &tp1->pokemones[n];
 }
