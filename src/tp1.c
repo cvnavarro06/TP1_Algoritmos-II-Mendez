@@ -33,11 +33,11 @@ struct tp1 {
 void ordenar_pokemones(struct pokemon *pokemones, size_t tope)
 {
 	struct pokemon aux;
-	int j;
-	for (int i = 1; i < tope; i++) {
+	size_t j;
+	for (size_t i = 1; i < tope; i++) {
 		j = i;
 		aux = pokemones[i];
-
+		printf("He entrado al for\n");
 		while ((j > 0) &&
 		       strcasecmp(pokemones[j - 1].nombre, aux.nombre) > 0) {
 			pokemones[j] = pokemones[j - 1];
@@ -50,18 +50,17 @@ void ordenar_pokemones(struct pokemon *pokemones, size_t tope)
 bool cargar_tp1(tp1_t *tp1, int velocidad, float peso, char *nombre,
 		char rareza)
 {
-	bool invalid_data = false;
 
 	if (velocidad >= MIN_VELOCIDAD && velocidad <= MAX_VELOCIDAD) {
 		tp1->pokemones[tp1->cantidad].velocidad = velocidad;
 	} else {
-		invalid_data = true;
+		return false;
 	}
 
 	if (peso > PESO_MIN) {
 		tp1->pokemones[tp1->cantidad].peso = peso;
 	} else {
-		invalid_data = true;
+		return false;
 	}
 
 	if (rareza == RAREZA_COMUN_C) {
@@ -71,13 +70,12 @@ bool cargar_tp1(tp1_t *tp1, int velocidad, float peso, char *nombre,
 	} else if (rareza == RAREZA_LEGENDARIO_C) {
 		tp1->pokemones[tp1->cantidad].rareza = RAREZA_LEGENDARIO;
 	} else {
-		invalid_data = true;
+		return false;
 	}
 
-	if (!invalid_data)
-		tp1->pokemones[tp1->cantidad].nombre = nombre;
+	tp1->pokemones[tp1->cantidad].nombre = nombre;
 
-	return invalid_data;
+	return true;
 }
 
 bool reservar_memoria(struct pokemon **a_reservar, size_t tamanio)
@@ -150,9 +148,9 @@ tp1_t *tp1_leer_archivo(const char *nombre)
                 bool data = cargar_tp1(file, velocidad, peso,
 						       name, rareza);
 
-                file->cantidad++;
-
-				if (!data) {
+							   
+				if (data) {
+					file->cantidad++;
 					err = reservar_memoria(
 						&file->pokemones,
 						file->cantidad);
@@ -233,9 +231,11 @@ tp1_t *tp1_combinar(tp1_t *tp1_a, tp1_t *tp1_b)
 
 	printf("Previo a ordenar\n");
 
-	ordenar_pokemones(tp1_a->pokemones, tp1_a->cantidad);
-
 	ordenar_pokemones(tp1_b->pokemones, tp1_b->cantidad);
+
+	printf("tp1_b Ordenado\nYendo a ordenar el tp1_a\n");
+
+	ordenar_pokemones(tp1_a->pokemones, tp1_a->cantidad);
 
 	printf("Ordenado correctamente");
 
@@ -244,8 +244,6 @@ tp1_t *tp1_combinar(tp1_t *tp1_a, tp1_t *tp1_b)
 				      tp1_b->pokemones[i_b].nombre);
 
 		bool data;
-
-		tp1_r->cantidad++;
 
 		//Caso: Primer string mayor (o sea tp1_a)
 		if (comp > 0) {
@@ -286,6 +284,7 @@ tp1_t *tp1_combinar(tp1_t *tp1_a, tp1_t *tp1_b)
 			i_b++;
 
 			if (!data) {
+				tp1_r->cantidad++;
 				err = reservar_memoria(
 					&tp1_r->pokemones,
 					tp1_r->cantidad);
