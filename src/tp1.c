@@ -134,7 +134,7 @@ tp1_t *tp1_leer_archivo(const char *nombre)
 
 	file->cantidad = 0;
 
-	char *name;
+	char *name = NULL;
 	int velocidad;
 	float peso;
 	char rareza;
@@ -151,7 +151,7 @@ tp1_t *tp1_leer_archivo(const char *nombre)
 		if (leido == 4) {
 			bool repetido = false;
 
-			for (int i = 0; i < file->cantidad; i++) {
+			for (int i = 0; i < file->cantidad && !repetido; i++) {
 				if (strcasecmp(file->pokemones[i].nombre,
 					       name) == 0) {
 					repetido = true;
@@ -404,7 +404,7 @@ tp1_t *tp1_escribir_archivo(tp1_t *tp1, const char *nombre)
  */
 struct pokemon *tp1_buscar_pokemon(tp1_t *tp1, const char *nombre)
 {
-	if (tp1 == NULL) {
+	if (tp1 == NULL || nombre == NULL) {
 		return NULL;
 	}
 
@@ -433,13 +433,12 @@ struct pokemon *tp1_buscar_pokemon(tp1_t *tp1, const char *nombre)
  */
 struct pokemon *tp1_buscar_orden(tp1_t *tp1, size_t n)
 {
-	if (tp1 == NULL) {
+	//Por si el usuario pasa n >= tope
+	if (tp1 == NULL || n >= tp1->cantidad) {
 		return NULL;
 	}
 
 	ordenar_pokemones(tp1->pokemones, tp1->cantidad);
-
-	printf("file ordenado correctamente\n");
 
 	return &tp1->pokemones[n];
 }
@@ -453,6 +452,10 @@ struct pokemon *tp1_buscar_orden(tp1_t *tp1, size_t n)
 size_t tp1_iterar(tp1_t *tp1, bool (*f)(struct pokemon *, void *), void *extra)
 {
 	size_t contador = 0;
+
+	if (tp1 == NULL || f == NULL || extra == NULL) {
+		return contador;
+	}
 
 	for (int i = 0; i < tp1->cantidad; i++) {
 		if ((f)(&tp1->pokemones[i], extra)) {
