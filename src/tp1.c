@@ -253,12 +253,6 @@ tp1_t *tp1_combinar(tp1_t *tp1_a, tp1_t *tp1_b)
 					  tp1_b->pokemones[i_b].nombre,
 					  tp1_b->pokemones[i_b].rareza);
 			i_b++;
-
-			if (!data) {
-				err = reservar_memoria(
-					&tp1_r->pokemones,
-					tp1_r->cantidad);
-			}
 		} else if (comp < 0) { //Caso: Primer string menor
 			data = cargar_tp1(tp1_r,
 					  tp1_a->pokemones[i_a].velocidad,
@@ -266,14 +260,8 @@ tp1_t *tp1_combinar(tp1_t *tp1_a, tp1_t *tp1_b)
 					  tp1_a->pokemones[i_a].nombre,
 					  tp1_a->pokemones[i_a].rareza);
 			i_a++;
-
-			if (!data) {
-				err = reservar_memoria(
-					&tp1_r->pokemones,
-					tp1_r->cantidad);
-			}
 		} else { //Caso: Son iguales
-			//Solamente cargo 1 de los 2 (Se unen)
+			//Solamente cargo el primero (solicitado por el .h)
 			data = cargar_tp1(tp1_r,
 					  tp1_a->pokemones[i_a].velocidad,
 					  tp1_a->pokemones[i_a].peso,
@@ -282,14 +270,14 @@ tp1_t *tp1_combinar(tp1_t *tp1_a, tp1_t *tp1_b)
 
 			i_a++;
 			i_b++;
-
-			if (!data) {
-				tp1_r->cantidad++;
-				err = reservar_memoria(
-					&tp1_r->pokemones,
-					tp1_r->cantidad);
-			}
 		}
+
+		if (!data) {
+			tp1_r->cantidad++;
+			err = reservar_memoria(
+				&tp1_r->pokemones,
+				tp1_r->cantidad);
+			}
 	}
 
 	if (err) {
