@@ -321,35 +321,35 @@ void iterar_nombre_datos()
 
 int main () 
 {
-    pa2m_nuevo_grupo("PRUEBAS DE LECTURA");
+    pa2m_nuevo_grupo("Pruebas de lectura de archivos | tp1_lecura_archivos()");
     lectura_error();
     lectura_correcta();
     lectura_vacio_e_inexistente();
 
-    pa2m_nuevo_grupo("PRUEBAS DE CANTIDADES");
+    pa2m_nuevo_grupo("Pruebas de cantidad de pokemones | tp1_cantidad()");
     cantidades();
 
-    pa2m_nuevo_grupo("PRUEBAS DE ESCRIBIR UN ARCHIVO");
+    pa2m_nuevo_grupo("Pruebas para escribir un archivo nuevo | tp1_escribir_archivo()");
     escribir_archivo_null();
     escribir_archivo_exito();
 
-	pa2m_nuevo_grupo("PRUEBAS DE COMBINAR");
+	pa2m_nuevo_grupo("Pruebas para combinar dos tp1 | tp1_combinar()");
     combinar_exito();
     combinaciones_con_null();
     combinar_tp_vacio();
 
-	pa2m_nuevo_grupo("PRUEBAS DE BUSCAR POKEMON");
+	pa2m_nuevo_grupo("Pruebas para buscar cierto pokemon | tp1_buscar_pokemon()");
     buscar_pokemon_especifico();
     buscar_pokemon_case_sensitive();
     buscar_pokemon_inexistente();
     buscar_pokemon_null();
 
-	pa2m_nuevo_grupo("PRUEBAS DE BUSCAR POR ORDEN");
+	pa2m_nuevo_grupo("Pruebas para buscar ordenadamente cierto pokemon | tp1_buscar_orden()");
     buscar_orden_f_l();
     buscar_orden_invalido();
     buscar_orden_null();
 
-	pa2m_nuevo_grupo("PRUEBAS DE ITERAR");
+	pa2m_nuevo_grupo("Pruebas de iterar sobre los pokemones | tp1_iterar()");
 	iterar_null();
 	iterar_completo();
 	iterar_nombre_datos();
