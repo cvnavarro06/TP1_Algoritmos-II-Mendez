@@ -32,6 +32,7 @@ struct tp1 {
 	size_t capacidad_m;
 };
 
+
 char *duplicar_string(char *string)
 {
 	if (string == NULL) {
@@ -63,6 +64,28 @@ void ordenar_pokemones(struct pokemon *pokemones, size_t tope)
 		}
 		pokemones[j] = aux;
 	}
+}
+
+void eliminar_duplicados(tp1_t *file)
+{
+
+	for (int i = 1; i<(int)file->cantidad; i++) {
+
+		if (strcasecmp(file->pokemones[i].nombre, file->pokemones[i - 1].nombre) == 0) {
+			
+			free(file->pokemones[i].nombre);
+
+			for (int j = i; j<(int)file->cantidad - 1; j++) {
+				file->pokemones[j] = file->pokemones[j + 1];
+			}
+			file->cantidad--;
+
+			//Resto un i para evaluar si el siguiente pokemon es igual al anterior (Pueden ser varios duplicados)
+			i--;
+		}
+
+	}
+
 }
 
 bool cargar_tp1(tp1_t *tp1, int velocidad, float peso, char *nombre,
@@ -163,36 +186,23 @@ tp1_t *tp1_leer_archivo(const char *nombre)
 				   &peso, &rareza, &otro);
 		//Confirmo que sean 4 columnas
 		if (leido == LINEAS_ESPERADAS) {
-			bool repetido = false;
 
-			for (int i = 0; i < file->cantidad && !repetido; i++) {
-				if (strcasecmp(file->pokemones[i].nombre,
-					       name) == 0) {
-					repetido = true;
-				}
+			if (file->cantidad >= file->capacidad_m) {
+				file->capacidad_m *= 2;
+				err = reservar_memoria_pokemon(
+					&file->pokemones,
+					file->capacidad_m);
 			}
-
-			if (!repetido) {
-				if (file->cantidad >= file->capacidad_m) {
-					file->capacidad_m *= 2;
-					err = reservar_memoria_pokemon(
-						&file->pokemones,
-						file->capacidad_m);
-				}
-
-				if (!err) {
-					bool data = cargar_tp1(file, velocidad,
-							       peso, name,
-							       rareza);
-					if (data) {
-						file->cantidad++;
-					} else { // Si se cargaron mal los datos
-						free(name);
-					}
-				} else { //Si hubo un error al reservar más memoria
+			if (!err) {
+				bool data = cargar_tp1(file, velocidad,
+						       peso, name,
+						       rareza);
+				if (data) {
+					file->cantidad++;
+				} else { // Si se cargaron mal los datos
 					free(name);
 				}
-			} else { //Si es un pokemon repetido
+			} else { //Si hubo un error al reservar más memoria
 				free(name);
 			}
 		} else { //Si se leyeron líneas distintas a 4
@@ -209,6 +219,10 @@ tp1_t *tp1_leer_archivo(const char *nombre)
 		tp1_destruir(file);
 		fclose(archivo);
 		return NULL;
+	} else {
+		ordenar_pokemones(file->pokemones, file->cantidad);
+
+		eliminar_duplicados(file);
 	}
 
 	fclose(archivo);
@@ -265,10 +279,6 @@ tp1_t *tp1_combinar(tp1_t *tp1_a, tp1_t *tp1_b)
 	int i_b = 0;
 
 	bool err = false;
-
-	ordenar_pokemones(tp1_b->pokemones, tp1_b->cantidad);
-
-	ordenar_pokemones(tp1_a->pokemones, tp1_a->cantidad);
 
 	while (i_a < tp1_a->cantidad && i_b < tp1_b->cantidad && !err) {
 		int comp = strcasecmp(tp1_a->pokemones[i_a].nombre,
